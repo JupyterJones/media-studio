@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Novel Images Flipbook Player & Sequential Monitor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --card-bg: #111827;
+            --panel-bg: #162032;
+            --border: #1f293d;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --primary: #38bdf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --text-main: #f3f4f6;
+            --text-sub: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #a5b4fc, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-running {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-idle {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #34d399;
+            box-shadow: 0 0 8px #34d399;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            background: var(--panel-bg);
+            color: var(--text-main);
+        }
+
+        .btn:hover {
+            background: var(--card-bg);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .select-input {
+            background: var(--panel-bg);
+            color: #38bdf8;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .select-input:focus {
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+        }
+
+        .select-input option {
+            background: #111827;
+            color: #f3f4f6;
+        }
+
+        main {
+            flex: 1;
+            padding: 1.25rem 1.5rem;
+            display: grid;
+            grid-template-columns: 480px 1fr;
+            gap: 1.5rem;
+            max-width: 1700px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 1100px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .preview-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: sticky;
+            top: 75px;
+            align-self: start;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .preview-viewport {
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            aspect-ratio: 512 / 768;
+            height: 600px;
+            max-height: 600px;
+            width: 100%;
+            flex-shrink: 0;
+        }
+
+        .preview-viewport img {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .viewport-overlay {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #38bdf8;
+            font-weight: 600;
+            z-index: 10;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 85%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .scrubber-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scrubber-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .scrubber-slider {
+            flex: 1;
+            min-width: 100px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .gallery-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .progress-bar-container {
+            background: var(--panel-bg);
+            border-radius: 9999px;
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin: 6px 0;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #6366f1, #38bdf8);
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .stat-item {
+            background: var(--panel-bg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.0rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .prompt-preview-box {
+            background: rgba(0, 0, 0, 0.35);
+            border-left: 3px solid var(--primary);
+            padding: 10px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: #cbd5e1;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .frames-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            max-height: 580px;
+            overflow-y: auto;
+            padding-right: 4px;
+            scroll-behavior: smooth;
+        }
+
+        .frame-thumb {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .frame-thumb:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .frame-thumb.active {
+            border: 2px solid #38bdf8;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+        }
+
+        .frame-thumb img {
+            width: 100%;
+            aspect-ratio: 512 / 768;
+            object-fit: cover;
+            display: block;
+        }
+
+        .frame-thumb-label {
+            font-size: 0.65rem;
+            padding: 4px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.7);
+            color: #cbd5e1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .terminal-log {
+            background: #04060c;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: #a5b4fc;
+            height: 125px;
+            max-height: 125px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <span style="font-size: 1.5rem;" id="headerIcon">🎬</span>
+            <div>
+                <h1 id="headerTitle">Media Studio Flipbook Player</h1>
+                <div style="font-size: 0.72rem; color: var(--text-sub);" id="headerSub">Interactive sequential viewer for novel_images* directories</div>
+            </div>
+        </div>
+
+        <div class="nav-actions">
+            <!-- Directory Selector Dropdown -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <label for="dirSelect" style="font-size: 0.72rem; color: var(--primary); font-weight: 700; letter-spacing: 0.05em;">DIRECTORY:</label>
+                <select id="dirSelect" class="select-input" onchange="onDirectoryChange(this.value)">
+                    {% for dir in directories %}
+                    <option value="{{ dir.name }}" {% if dir.name == selected_dir %}selected{% endif %}>
+                        📁 {{ dir.name }} ({{ dir.count }} frames • {{ dir.type_label }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Sort Selector -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <label for="sortSelect" style="font-size: 0.72rem; color: var(--text-sub); font-weight: 700;">SORT:</label>
+                <select id="sortSelect" class="btn" style="padding: 5px 8px; font-size: 0.72rem;" onchange="onSortChange(this.value)">
+                    <option value="name">🔢 Natural Sequence</option>
+                    <option value="time">🕒 Newest First</option>
+                </select>
+            </div>
+
+            <!-- Optional Filter -->
+            <input type="text" id="filterInput" placeholder="Filter frame / seed..." class="btn" style="width: 140px; padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;" oninput="onFilterInput(this.value)">
+
+            <!-- Status Pill -->
+            <div class="status-pill status-running" id="statusPill">
+                <span class="pulse-dot" id="pulseDot"></span>
+                <span id="statusText">READY</span>
+            </div>
+
+            <!-- Auto-Poll Checkbox -->
+            <label style="display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--text-sub); cursor: pointer; user-select: none;" title="Automatically poll for new frames">
+                <input type="checkbox" id="autoPollCheck" onchange="toggleAutoPoll(this.checked)" style="accent-color: var(--primary);"> Auto-Poll
+            </label>
+        </div>
+    </header>
+
+    <main>
+        <!-- LEFT: Preview & Flipbook Animation Scrubber -->
+        <section class="preview-pane">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; min-height: 22px; gap: 8px;">
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #38bdf8; white-space: nowrap;" id="viewportTitle">🎬 HIGH-RES FRAME VIEW</span>
+                    <span id="frameMeta" style="font-size: 0.75rem; color: var(--text-sub); font-family: 'JetBrains Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; text-align: right;">Frame 0 / 0</span>
+                </div>
+
+                <div class="preview-viewport">
+                    <div class="viewport-overlay" id="overlayIndex">Loading...</div>
+                    <img id="mainPreviewImg" src="" alt="Frame Preview">
+                </div>
+
+                <div class="scrubber-panel" style="margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-sub);">
+                        <span>Scrub Sequence / Flipbook:</span>
+                        <span id="scrubVal" style="font-family: 'JetBrains Mono', monospace;">0 / 0</span>
+                    </div>
+                    <div class="scrubber-controls">
+                        <button type="button" class="btn btn-primary" id="playBtn" onclick="togglePlay()">▶ Play Loop</button>
+                        <button type="button" class="btn" onclick="stepFrame(-1)" title="Previous Frame (Left Arrow)">⏮</button>
+                        <input type="range" id="frameScrubber" min="0" max="0" value="0" class="scrubber-slider" oninput="onScrub(this.value)">
+                        <button type="button" class="btn" onclick="stepFrame(1)" title="Next Frame (Right Arrow)">⏭</button>
+                        <button type="button" class="btn" onclick="jumpToFirst()" title="First Frame (Home)">⏪ First</button>
+                        <button type="button" class="btn" onclick="jumpToLatest()" title="Latest Frame (End)">⏩ Latest</button>
+                    </div>
+
+                    <!-- Speed & Loop Mode Controls -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; background: var(--panel-bg); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.75rem; margin-top: 4px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--text-sub);">Speed:</span>
+                            <input type="range" id="fpsSlider" min="1" max="30" value="10" style="width: 90px; accent-color: var(--primary);" oninput="setFps(this.value)">
+                            <span id="fpsVal" style="font-family: 'JetBrains Mono', monospace; color: #38bdf8; font-weight: 700;">10 FPS</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <button type="button" class="btn" id="loopModeBtn" onclick="toggleLoopMode()" style="padding: 3px 8px; font-size: 0.72rem;">🔁 Normal Loop</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <a id="downloadBtn" href="#" download class="btn" style="flex: 1; justify-content: center;">⬇️ Download Current Image</a>
+                    <a id="fullResLink" href="#" target="_blank" class="btn" style="flex: 1; justify-content: center;">🔍 View Full Res</a>
+                </div>
+            </div>
+
+            <!-- Console / Frame Inspector -->
+            <div class="card" style="padding: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-sub);">FRAME & DIRECTORY INSPECTOR</span>
+                    <span style="font-size: 0.68rem; color: #64748b; font-family: 'JetBrains Mono', monospace;">Keys: Space = Play, ← / → = Step</span>
+                </div>
+                <div id="logConsole" class="terminal-log">Awaiting frame inspection...</div>
+            </div>
+        </section>
+
+        <!-- RIGHT: Live Progression & Natural Sorted Gallery -->
+        <section class="gallery-pane">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <span style="font-size: 0.95rem; font-weight: 700; color: #fff;" id="progressTitle">Active Directory Progress</span>
+                    <span id="progressPct" style="font-size: 1.1rem; font-weight: 800; color: #38bdf8; font-family: 'JetBrains Mono', monospace;">0 frames</span>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div id="progressFill" class="progress-bar-fill"></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Directory</div>
+                        <div class="stat-value" id="statDir" style="font-size: 0.85rem; color: #38bdf8;">---</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Mode / Type</div>
+                        <div class="stat-value" id="statMode" style="font-size: 0.85rem; color: #a5b4fc;">---</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Seed</div>
+                        <div class="stat-value" id="statSeed">---</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label" id="statParamLabel">Current Parameter</div>
+                        <div class="stat-value" id="statParamVal">---</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Model / Checkpoint</div>
+                        <div class="stat-value" id="statModel" style="font-size: 0.8rem;">---</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+                    <div>
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #818cf8; text-transform: uppercase;" id="prompt1Label">Prompt:</span>
+                        <div class="prompt-preview-box" id="prompt1Box">Loading prompt metadata...</div>
+                    </div>
+                    <div id="prompt2Group" style="display: none;">
+                        <span style="font-size: 0.72rem; font-weight: 700; color: #38bdf8; text-transform: uppercase;">Morph Target (Prompt B):</span>
+                        <div class="prompt-preview-box" id="prompt2Box" style="border-left-color: #38bdf8;">Loading morph target prompt...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sequential Frames Gallery -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <span style="font-size: 0.88rem; font-weight: 700; color: #fff;">✨ SEQUENTIAL FRAMES</span>
+                        <div style="font-size: 0.72rem; color: var(--text-sub);">Sorted in sequence. Click any thumbnail to view or scrub.</div>
+                    </div>
+                    <span id="galleryCount" style="font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: #38bdf8;">0 frames</span>
+                </div>
+
+                <div id="framesGrid" class="frames-gallery-grid">
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-sub);">Scanning directory for image frames...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let rawFrames = [];
+        let allFrames = [];
+        let currentMetadata = {};
+        let currentIndex = 0;
+        let isPlaying = false;
+        let playTimer = null;
+        let pollTimer = null;
+        let currentDir = "{{ selected_dir }}";
+        let currentSort = "name";
+        let filterKeyword = '';
+        let fps = 10;
+        let isPingPong = false;
+        let pingPongDirection = 1;
+        let lastKnownCount = -1;
+
+        async function loadDirectory(dirName, forceResetIndex = false) {
+            if (!dirName) return;
+            currentDir = dirName;
+
+            let pill = document.getElementById("statusPill");
+            document.getElementById("statusText").innerText = "LOADING";
+
+            try {
+                let url = `/api/images?dir=${encodeURIComponent(dirName)}&sort=${encodeURIComponent(currentSort)}`;
+                let resp = await fetch(url + "&t=" + Date.now());
+                if (!resp.ok) throw new Error("Failed to load directory");
+                let data = await resp.json();
+
+                if (!data.success) {
+                    alert(data.error || "Failed to load directory frames");
+                    return;
+                }
+
+                currentMetadata = data.metadata || {};
+                applyMetadata(data);
+                updateFrames(data.images || [], forceResetIndex);
+
+                document.getElementById("statusText").innerText = isPlaying ? `PLAYING (${fps} FPS)` : "READY";
+            } catch (err) {
+                console.error("Error loading directory:", err);
+                document.getElementById("statusText").innerText = "ERROR";
+            }
+        }
+
+        function applyMetadata(data) {
+            let meta = data.metadata || {};
+            let dirName = data.directory;
+
+            document.getElementById("statDir").innerText = dirName;
+            document.getElementById("progressTitle").innerText = `Active Directory: ${dirName}`;
+            document.getElementById("statSeed").innerText = meta.seed || "---";
+
+            let modelName = meta.model || "---";
+            document.getElementById("statModel").innerText = modelName.split('.')[0] || "---";
+            document.getElementById("statModel").title = modelName;
+
+            let modeType = meta.type || "generic";
+            let typeLabels = {
+                'cfg': 'CFG Sweep',
+                'slerp': 'SLERP Morph',
+                'models': 'Models Comparison',
+                'generations': 'Generations',
+                'generic': 'Image Sequence'
+            };
+            document.getElementById("statMode").innerText = typeLabels[modeType] || modeType;
+
+            let headerIcons = {
+                'cfg': '🎯',
+                'slerp': '🌀',
+                'models': '🎭',
+                'generations': '✨',
+                'generic': '📁'
+            };
+            document.getElementById("headerIcon").innerText = headerIcons[modeType] || '🎬';
+
+            if (modeType === 'cfg') {
+                document.getElementById("statParamLabel").innerText = "Current CFG";
+                document.getElementById("prompt2Group").style.display = "none";
+                document.getElementById("prompt1Label").innerText = "Prompt:";
+                document.getElementById("prompt1Box").innerText = meta.prompt || "No prompt metadata found";
+            } else if (modeType === 'slerp') {
+                document.getElementById("statParamLabel").innerText = "Current t";
+                document.getElementById("prompt1Label").innerText = "Morph Origin (Prompt A):";
+                document.getElementById("prompt1Box").innerText = meta.prompt || "---";
+                document.getElementById("prompt2Group").style.display = "block";
+                document.getElementById("prompt2Box").innerText = meta.prompt2 || "---";
+            } else if (modeType === 'models') {
+                document.getElementById("statParamLabel").innerText = "Active Model";
+                document.getElementById("prompt2Group").style.display = "none";
+                document.getElementById("prompt1Label").innerText = "Prompt:";
+                document.getElementById("prompt1Box").innerText = meta.prompt || "No prompt metadata found";
+            } else {
+                document.getElementById("statParamLabel").innerText = "Frame Param";
+                document.getElementById("prompt2Group").style.display = "none";
+                document.getElementById("prompt1Label").innerText = "Directory Information:";
+                document.getElementById("prompt1Box").innerText = meta.prompt || `Viewing ${data.count} image frames from ${dirName}.`;
+            }
+
+            document.getElementById("progressPct").innerText = `${data.count} frames`;
+            document.getElementById("progressFill").style.width = "100%";
+        }
+
+        function updateFrames(frames, forceResetIndex) {
+            let countChanged = (frames.length !== lastKnownCount);
+            rawFrames = frames;
+            applyFilter(forceResetIndex || countChanged);
+            lastKnownCount = frames.length;
+        }
+
+        function applyFilter(resetIndex = false) {
+            if (!filterKeyword) {
+                allFrames = rawFrames;
+            } else {
+                let kw = filterKeyword.toLowerCase();
+                allFrames = rawFrames.filter(f => 
+                    f.filename.toLowerCase().includes(kw) || 
+                    (f.label && f.label.toLowerCase().includes(kw)) ||
+                    (f.meta && f.meta.toLowerCase().includes(kw))
+                );
+            }
+
+            let scrubber = document.getElementById("frameScrubber");
+            if (allFrames.length === 0) {
+                document.getElementById("framesGrid").innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-sub);">No matching frames found in directory.</div>`;
+                document.getElementById("galleryCount").innerText = "0 frames";
+                document.getElementById("scrubVal").innerText = "0 / 0";
+                document.getElementById("frameMeta").innerText = "Frame 0 / 0";
+                document.getElementById("overlayIndex").innerText = "No frames";
+                scrubber.max = 0;
+                scrubber.value = 0;
+                if (isPlaying) togglePlay();
+                return;
+            }
+
+            scrubber.max = allFrames.length - 1;
+            document.getElementById("galleryCount").innerText = `${allFrames.length} frames`;
+
+            renderGallery();
+
+            if (resetIndex || currentIndex >= allFrames.length) {
+                showFrame(0);
+            } else {
+                showFrame(currentIndex);
+            }
+        }
+
+        function renderGallery() {
+            let grid = document.getElementById("framesGrid");
+            let html = "";
+            allFrames.forEach((frame, idx) => {
+                let isActive = (idx === currentIndex) ? " active" : "";
+                html += `
+                <div class="frame-thumb${isActive}" id="thumb_${idx}" onclick="selectFrame(${idx})" title="${frame.filename} (${frame.label})">
+                    <img src="${frame.path}" loading="lazy" alt="${frame.filename}">
+                    <div class="frame-thumb-label">#${idx + 1} • ${frame.label}</div>
+                </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+
+        function selectFrame(idx) {
+            if (idx < 0 || idx >= allFrames.length) return;
+            if (isPlaying) togglePlay();
+            showFrame(idx);
+        }
+
+        function showFrame(idx) {
+            if (idx < 0 || idx >= allFrames.length) return;
+            currentIndex = idx;
+            let frame = allFrames[idx];
+
+            let img = document.getElementById("mainPreviewImg");
+            img.src = frame.path;
+
+            document.getElementById("frameMeta").innerText = `Frame ${idx + 1} / ${allFrames.length} (${frame.filename})`;
+            document.getElementById("overlayIndex").innerText = `#${idx + 1} • ${frame.label}`;
+            document.getElementById("scrubVal").innerText = `${idx + 1} / ${allFrames.length}`;
+            document.getElementById("frameScrubber").value = idx;
+
+            // Update Parameter stat box
+            let paramEl = document.getElementById("statParamVal");
+            if (currentMetadata.type === 'cfg' && frame.extra && frame.extra.cfg != null) {
+                paramEl.innerText = Number(frame.extra.cfg).toFixed(3);
+            } else if (currentMetadata.type === 'slerp' && frame.extra && frame.extra.t != null) {
+                paramEl.innerText = Number(frame.extra.t).toFixed(3);
+            } else if (currentMetadata.type === 'models' && frame.extra && frame.extra.model) {
+                paramEl.innerText = (frame.extra.model || "").split('.')[0];
+            } else {
+                paramEl.innerText = `#${idx + 1} of ${allFrames.length}`;
+            }
+
+            document.getElementById("downloadBtn").href = frame.path;
+            document.getElementById("downloadBtn").setAttribute("download", frame.filename);
+            document.getElementById("fullResLink").href = frame.path;
+
+            // Update Frame Inspector Console
+            let logDetails = `[DIRECTORY]: ${currentDir}\n[FILE]: ${frame.filename}\n[FRAME]: #${idx + 1} of ${allFrames.length}\n[LABEL]: ${frame.label}\n[INFO]: ${frame.meta}`;
+            if (frame.extra) {
+                if (frame.extra.seed) logDetails += `\n[SEED]: ${frame.extra.seed}`;
+                if (frame.extra.step) logDetails += `\n[STEPS]: ${frame.extra.step}`;
+                if (frame.extra.cfg != null) logDetails += `\n[GUIDANCE]: ${frame.extra.cfg}`;
+                if (frame.extra.t != null) logDetails += `\n[SLERP t]: ${frame.extra.t}`;
+                if (frame.extra.model) logDetails += `\n[MODEL]: ${frame.extra.model}`;
+            }
+            document.getElementById("logConsole").innerText = logDetails;
+
+            // Highlight thumbnail without scrolling the main window or causing layout jumps
+            let prevActive = document.querySelector(".frame-thumb.active");
+            if (prevActive) prevActive.classList.remove("active");
+            let active = document.getElementById(`thumb_${idx}`);
+            if (active) {
+                active.classList.add("active");
+                let container = document.getElementById("framesGrid");
+                if (container) {
+                    let aTop = active.offsetTop - container.offsetTop;
+                    let aBottom = aTop + active.offsetHeight;
+                    if (aTop < container.scrollTop) {
+                        container.scrollTop = aTop;
+                    } else if (aBottom > container.scrollTop + container.clientHeight) {
+                        container.scrollTop = aBottom - container.clientHeight;
+                    }
+                }
+            }
+        }
+
+        function stepFrame(delta) {
+            if (allFrames.length === 0) return;
+            if (isPlaying) togglePlay();
+            let next = (currentIndex + delta + allFrames.length) % allFrames.length;
+            showFrame(next);
+        }
+
+        function jumpToFirst() {
+            if (allFrames.length > 0) {
+                if (isPlaying) togglePlay();
+                showFrame(0);
+            }
+        }
+
+        function jumpToLatest() {
+            if (allFrames.length > 0) {
+                if (isPlaying) togglePlay();
+                showFrame(allFrames.length - 1);
+            }
+        }
+
+        function onScrub(val) {
+            let idx = parseInt(val);
+            if (isPlaying) togglePlay();
+            showFrame(idx);
+        }
+
+        function setFps(newFps) {
+            fps = Math.max(1, Math.min(30, parseInt(newFps) || 10));
+            document.getElementById("fpsVal").innerText = `${fps} FPS`;
+            if (isPlaying) {
+                restartPlayTimer();
+            }
+        }
+
+        function toggleLoopMode() {
+            isPingPong = !isPingPong;
+            let btn = document.getElementById("loopModeBtn");
+            if (isPingPong) {
+                btn.innerText = "🏓 Ping-Pong";
+                btn.style.color = "#38bdf8";
+                btn.style.borderColor = "#0284c7";
+            } else {
+                btn.innerText = "🔁 Normal Loop";
+                btn.style.color = "";
+                btn.style.borderColor = "";
+            }
+        }
+
+        function togglePlay() {
+            let btn = document.getElementById("playBtn");
+            let pill = document.getElementById("statusPill");
+            if (isPlaying) {
+                isPlaying = false;
+                clearInterval(playTimer);
+                btn.innerText = "▶ Play Loop";
+                btn.classList.add("btn-primary");
+                document.getElementById("statusText").innerText = "PAUSED";
+            } else {
+                if (allFrames.length < 2) return;
+                isPlaying = true;
+                btn.innerText = "⏸ Pause Loop";
+                btn.classList.remove("btn-primary");
+                document.getElementById("statusText").innerText = `PLAYING (${fps} FPS)`;
+                restartPlayTimer();
+            }
+        }
+
+        function restartPlayTimer() {
+            clearInterval(playTimer);
+            let interval = 1000 / fps;
+            playTimer = setInterval(() => {
+                let next;
+                if (!isPingPong) {
+                    next = (currentIndex + 1) % allFrames.length;
+                } else {
+                    next = currentIndex + pingPongDirection;
+                    if (next >= allFrames.length) {
+                        pingPongDirection = -1;
+                        next = Math.max(0, allFrames.length - 2);
+                    } else if (next < 0) {
+                        pingPongDirection = 1;
+                        next = Math.min(allFrames.length - 1, 1);
+                    }
+                }
+                showFrame(next);
+            }, interval);
+        }
+
+        function onDirectoryChange(dir) {
+            history.replaceState(null, '', `?dir=${encodeURIComponent(dir)}`);
+            lastKnownCount = -1;
+            loadDirectory(dir, true);
+        }
+
+        function onSortChange(sort) {
+            currentSort = sort;
+            loadDirectory(currentDir, false);
+        }
+
+        function onFilterInput(val) {
+            filterKeyword = val.trim();
+            applyFilter(true);
+        }
+
+        function toggleAutoPoll(enabled) {
+            if (enabled) {
+                if (pollTimer) clearInterval(pollTimer);
+                pollTimer = setInterval(() => {
+                    loadDirectory(currentDir, false);
+                }, 3000);
+            } else {
+                if (pollTimer) {
+                    clearInterval(pollTimer);
+                    pollTimer = null;
+                }
+            }
+        }
+
+        // Keyboard navigation
+        window.addEventListener("keydown", (e) => {
+            if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT")) return;
+            if (e.code === "Space") {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.code === "ArrowLeft") {
+                e.preventDefault();
+                stepFrame(-1);
+            } else if (e.code === "ArrowRight") {
+                e.preventDefault();
+                stepFrame(1);
+            } else if (e.code === "Home") {
+                e.preventDefault();
+                jumpToFirst();
+            } else if (e.code === "End") {
+                e.preventDefault();
+                jumpToLatest();
+            }
+        });
+
+        async function initDirectories() {
+            let selectEl = document.getElementById("dirSelect");
+            // Check if options need client-side population (e.g. when opened as static HTML)
+            if (!selectEl.options || selectEl.options.length === 0 || (selectEl.options[0] && selectEl.options[0].value.indexOf("{") !== -1)) {
+                try {
+                    let resp = await fetch("/api/directories");
+                    let data = await resp.json();
+                    if (data.success && data.directories) {
+                        selectEl.innerHTML = "";
+                        data.directories.forEach(d => {
+                            let opt = document.createElement("option");
+                            opt.value = d.name;
+                            opt.textContent = `📁 ${d.name} (${d.count} frames • ${d.type_label})`;
+                            selectEl.appendChild(opt);
+                        });
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch directories list:", e);
+                }
+            }
+
+            // Sync with URL query parameter ?dir=... if present
+            let urlParams = new URLSearchParams(window.location.search);
+            let dirParam = urlParams.get("dir");
+            if (dirParam) {
+                for (let i = 0; i < selectEl.options.length; i++) {
+                    if (selectEl.options[i].value === dirParam) {
+                        selectEl.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            currentDir = selectEl.value || (selectEl.options[0] ? selectEl.options[0].value : "");
+            loadDirectory(currentDir, true);
+        }
+
+        window.onload = function() {
+            initDirectories();
+        };
+    </script>
+</body>
+</html>

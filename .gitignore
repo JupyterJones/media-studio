@@ -1,0 +1,71 @@
+# ==============================================================================
+# Media Studio - .gitignore
+# ==============================================================================
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Node & Electron
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Rust & Tauri Builds
+**/target/
+**/*.rs.bk
+
+# Standalone AppImage Build Artifacts
+*.AppImage
+*.AppImage.digest
+*.zsync
+AppDir*/
+
+# Generated Media Outputs & Video Exports
+static/demos/
+*.mp4
+*.mkv
+*.webm
+
+# Logs, Diagnostics & Local Transcripts
+*.log
+app_log.txt
+*_log.txt
+gravity_talk.txt
+*_transcript*.txt
+transcript*.jsonl
+
+# Temporary Files
+*.tmp
+*.temp
+*~
+*.swp
+*.swo
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+
+# Operating System & IDE Configs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace

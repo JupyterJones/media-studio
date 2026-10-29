@@ -1,0 +1,70 @@
+================================================================================
+MEDIA STUDIO (VIDEOMAKER) - GITHUB & YOUTUBE DESCRIPTIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+1. GITHUB REPOSITORY METADATA & ABOUT BLURB
+--------------------------------------------------------------------------------
+
+[Short Repository Tagline / About (Under 350 chars for GitHub About box)]:
+High-performance image sequence flipbook player, cut trimmer, and instant MP4 video maker. Available as standalone Linux AppImages in three flavors: Python/Flask Web Studio, native Electron Desktop, and ultra-lightweight Rust/Tauri.
+
+[GitHub Repository Topics / Tags]:
+image-sequence, flipbook, video-generator, ffmpeg, tauri, rust, electron, python, flask, appimage, stable-diffusion, ai-art, animation, stop-motion, timelapse
+
+[GitHub Release Notes / Short Readme Description]:
+Media Studio (VideoMaker) transforms raw image sequences (PNG, JPG, WebP) into smooth, frame-accurate animations and exported MP4 videos. Designed for AI generations, stop motion, timelapses, and rendering workflows.
+
+Key Highlights:
+• 100% Portable AppImages (Python, Electron, Tauri) with embedded FFmpeg
+• Interactive speed control (1–60 FPS) synchronized with video export
+• Frame-accurate cut trimmer with forward, reverse, and ping-pong loops
+• Zero-config automatic workspace setup (scans static/novel_images*)
+• Full-featured CLI for headless scripting and automated batch exports
+
+
+--------------------------------------------------------------------------------
+2. YOUTUBE VIDEO METADATA & DESCRIPTION
+--------------------------------------------------------------------------------
+
+[Suggested YouTube Video Titles (Choose one)]:
+• Media Studio: High-Performance Image Sequence Flipbook Player & Video Maker
+• How to Convert AI Image Sequences to Smooth MP4 Videos (Tauri, Electron & Python)
+• Turn Image Sequences into Videos Instantly! Media Studio VideoMaker Walkthrough
+• Build & Run Media Studio: Portable Linux AppImages with Python, Electron & Tauri
+
+[YouTube Description Template]:
+Welcome to Media Studio (VideoMaker) — a lightweight, high-performance tool for previewing sequential image sequences, trimming animation cuts, and exporting clean MP4 videos with embedded FFmpeg.
+
+Whether you're rendering Stable Diffusion AI frame interpolations, stop-motion animations, 3D render passes, or timelapses, Media Studio provides instant, frame-accurate control without the overhead of heavy video editing software.
+
+🚀 Available in 3 Standalone AppImage Flavors:
+1. Standard Python / Flask Web Studio (auto-launches in your browser)
+2. Native Electron Desktop Application (smooth, dark-mode framed UI)
+3. Ultra-fast Native Rust / Tauri Studio (lightweight, under 75 MB)
+
+⏱️ TIMESTAMPS:
+0:00 - Introduction & Overview
+0:35 - Image Folder Structure & novel_images* Pattern
+1:15 - Flipbook Player & FPS Speed Slider (1–60 FPS)
+1:50 - Precision Cut Trimming (Start / End Markers)
+2:30 - Forward, Reverse & Ping-Pong Looping
+3:10 - One-Click MP4 Movie Export with FFmpeg
+3:45 - CLI Batch Video Generation
+4:25 - Standalone AppImages (Python, Electron, Tauri)
+5:05 - Installation & Source Setup
+
+✨ KEY FEATURES:
+• Frame-accurate playback with live scrubbing and filmstrip navigation
+• Forward and reverse cut detection (e.g., render 60 to 1 without re-sorting)
+• Ping-Pong bounce loop and sequence repetition multiplier (1–10x)
+• Embedded standalone FFmpeg with optimized H.264/MP4 encoding
+• Headless CLI mode for batch automation scripts
+• Standalone Linux AppImages — zero installation required!
+
+🔗 PROJECT LINKS & SOURCE CODE:
+GitHub: https://github.com/<your-username>/media-studio
+Documentation & Setup: See README.md and INSTALLMENT.md in the repository
+
+🏷️ YOUTUBE TAGS & HASHTAGS:
+#ImageSequence #VideoMaker #AppImage #Tauri #Electron #Python #FFmpeg #Animation #StableDiffusion #AIArt #OpenSource #Linux

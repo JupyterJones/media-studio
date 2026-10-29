@@ -1,0 +1,8 @@
+{
+  "name": "electron-videomaker",
+  "version": "1.0.0",
+  "description": "High-performance Image Sequence Flipbook & VideoMaker Studio",
+  "main": "main.cjs",
+  "author": "MediaStudio",
+  "license": "MIT"
+}
